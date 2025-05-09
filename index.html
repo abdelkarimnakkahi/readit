@@ -4,20 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Read It for Me</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <section>
         <div class="container">
-            <h1>Readit</h1>
+            <div class="main_text">
+                <h1>Read<span>it</span></h1>
             <h2>A simple tool for reading content aloud.</h2>
-    <form >
-        <textarea id="text" cols="35" rows="15"></textarea>
+            </div>
+    <div class="main_form">
+        <form >
+        <textarea id="text" cols="35" rows="25" placeholder="Please type your text here."></textarea>
         <br>
         <select name="" id="voiceList"></select>
         <br>
         <button type="submit">Play</button>
     </form>
-    <script src="index.js"></script>
+    </div>
+    <script src="js/index.js"></script>
         </div>
     </section>
 </body>
