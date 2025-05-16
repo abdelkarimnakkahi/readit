@@ -3,43 +3,68 @@ const select = document.querySelector("#voiceList");
 const button = document.querySelector("button");
 const synth = window.speechSynthesis;
 
+let isSpeaking = false; // Tracks speaking state
+let currentUtterance = null;
+
 document.addEventListener("DOMContentLoaded", init);
 
-function init(){
-    button.addEventListener("click", textToSpeech);
-    synth.addEventListener("voiceschanged", loadVoices)
+function init() {
+    button.addEventListener("click", handleSpeech);
+    synth.addEventListener("voiceschanged", loadVoices);
 }
 
-// Load Voices
-function loadVoices(){
-    // console.log(synth.getVoices());
+// Load voices into the dropdown
+function loadVoices() {
     select.innerHTML = "";
-    for(let voice of synth.getVoices()){
-        let option= `<option value='${voice.name}'>${voice.name} (${voice.lang}) </option>`;
-        select.insertAdjacentHTML("beforeend", option);
-        // console.log(option);
-    }
+    const voices = synth.getVoices().filter(v => v.lang.startsWith("en")); // optional filter
+
+    voices.forEach((voice, index) => {
+        const option = document.createElement("option");
+        option.value = voice.name;
+        option.textContent = `${voice.name} (${voice.lang})`;
+        if (index === 0) option.selected = true; // default to first voice
+        select.appendChild(option);
+    });
 }
 
-function textToSpeech(e){
+// Main speech function
+function handleSpeech(e) {
     e.preventDefault();
-    // Check textaria
-    if(!text.value.trim()){
+
+    const inputText = text.value.trim();
+    if (!inputText) {
         alert("Please fill data");
-        return 0;
+        return;
     }
 
-    const utterance = new SpeechSynthesisUtterance(text.value);
+    // Start speech if not currently speaking
+    if (!synth.speaking && !isSpeaking) {
+        currentUtterance = new SpeechSynthesisUtterance(inputText);
 
-    // All voices
-    for(let voice of synth.getVoices()){
-        if(voice.name == select.value){
-            utterance.voice = voice;
-            // console.log(utterance.voice);
+        // Set selected voice
+        const selectedVoiceName = select.value;
+        const voice = synth.getVoices().find(v => v.name === selectedVoiceName);
+        if (voice) {
+            currentUtterance.voice = voice;
         }
-    }
-    
-    if(!synth.speaking){
-        synth.speak(utterance);
+
+        // When speech ends
+        currentUtterance.onend = () => {
+            isSpeaking = false;
+            button.textContent = "Play";
+        };
+
+        synth.speak(currentUtterance);
+        isSpeaking = true;
+        button.textContent = "Pause";
+
+    } else if (synth.speaking && !synth.paused) {
+        // Pause speech
+        synth.pause();
+        button.textContent = "Resume";
+    } else if (synth.paused) {
+        // Resume speech
+        synth.resume();
+        button.textContent = "Pause";
     }
 }
